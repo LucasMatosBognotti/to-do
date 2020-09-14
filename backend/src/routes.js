@@ -2,8 +2,9 @@ import { Router } from 'express';
 
 const routes = new Router();
 
-routes.get('/', (req, res) => {
-  return res.json({ message: 'Hello World' });
-});
+import TodoController from './app/controllers/TodoController';
+
+routes.post('/todo', TodoController.store);
+routes.get('/todo/:id', TodoController.index);
 
 export default routes;

@@ -1,5 +1,7 @@
 import express from 'express';
 
+import './config/database';
+
 import routes from './routes';
 
 const app = express();
