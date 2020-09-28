@@ -9,11 +9,15 @@ class TodoController {
   }
 
   async index(req, res) {
-    const { id} = req.params;
+    const todos = await Todo.find();
 
-    const todo = await Todo.findOne({
-      _id: id
-    });
+    return res.json(todos);
+  }
+
+  async show(req, res) {
+    const { id } = req.params;
+
+    const todo = await Todo.findOne({ _id: id });
 
     return res.json(todo);
   }
