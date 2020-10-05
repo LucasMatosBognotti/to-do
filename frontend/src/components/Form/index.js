@@ -18,11 +18,32 @@ function Form() {
       who,
       where,
       priority
-    }).then(() => {
-      alert('Cadastro realizado com sucesso');
-    }).catch(() => {'Erro no cadastro'});
+    })
+    .then((response) => {    
+      const formatDate = format(parseISO(response.data.date), 'dd/MM/yyyy');
+      setList([...lists, Object.assign({ formatDate }, response.data)])
+    })
+    .catch(() => { alert('Erro no cadastro')})
 
-  }, [description, who, where, priority]);
+  }, [description, who, where, priority, lists]);
+
+  const handleRemove = useCallback(async (id) => {
+    await api.delete(`/todo/${id}`);
+    setList(lists.filter(list => list._id !== id));
+  }, [lists]);
+
+  const handleUpdate = useCallback(async (item) => {
+    const response = await api.put(`/todo/${item._id}`, {
+      done: item.done === true ? false : true
+    });
+
+    const formatDate = format(parseISO(response.data.date), 'dd/MM/yyyy');
+
+    lists[lists.findIndex(list => list._id === item._id)] = Object.assign({ formatDate }, response.data);
+    
+    setList(lists.map(list => list));
+
+  }, [lists]);
 
   useEffect(() => {
     api.get('todos').then(response => {
@@ -30,7 +51,6 @@ function Form() {
         ...list,
         formatDate: format(parseISO(list.date), 'dd/MM/yyyy'),
       }));
-      
       setList(data);
     })
   }, []);
@@ -87,26 +107,58 @@ function Form() {
       </div>
     </form>
 
-    <div className="container">
+    <div className="table-responsive">
       Lista de tarefas
-      <table className="table">
+      <table className="table table-hover">
         <thead>
           <tr>
-            <th>Descrição</th>
-            <th>Quem</th>
-            <th>Onde</th>
-            <th>Prioridade</th>
-            <th>Criada em</th>
+            <th scope="col">ID</th>
+            <th scope="col">Descrição</th>
+            <th scope="col">Quem</th>
+            <th scope="col">Onde</th>
+            <th scope="col">Prioridade</th>
+            <th scope="col">Criada em</th>
+            <th scope="col">Remove</th>
+            <th scope="col">Opções</th>
           </tr>
         </thead>
         <tbody>
           {lists.map(list => (
-            <tr key={list.id}>
+            <tr key={list._id}>
+              <td scope="row">{list._id}</td>
               <td>{list.description}</td>
               <td>{list.who}</td>
               <td>{list.where}</td>
               <td>{list.priority}</td>
               <td>{list.formatDate}</td>
+              <td>
+                <button
+                  className="btn btn-danger"
+                  type="button"
+                  onClick={() => handleRemove(list._id)}
+                >
+                  Remove
+                </button>
+              </td>
+              <td>
+                <button
+                  style={list.done ? { display: 'none' } : null}
+                  className="btn btn-warning"
+                  type="button"
+                  onClick={() => handleUpdate(list)}
+                >
+                  Marcar como feita
+                </button>
+
+                <button
+                  style={!list.done ? { display: 'none' } : null}
+                  className="btn btn-success"
+                  type="button"
+                  onClick={() => handleUpdate(list)}
+                >
+                  Marcar como desfeita
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

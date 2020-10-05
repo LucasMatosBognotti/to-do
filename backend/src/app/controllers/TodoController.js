@@ -21,6 +21,21 @@ class TodoController {
 
     return res.json(todo);
   }
+
+  async update(req, res) {
+    const { id } = req.params;
+
+    const todo = await Todo.findByIdAndUpdate({ _id: id }, req.body, { new: true } );
+
+    return res.json(todo);
+  }
+
+  async delete(req, res) {
+    const { id } = req.params;
+    await Todo.deleteOne({_id: id});
+
+    return res.json({ message: 'Deleted with suce' });
+  }
 }
 
 export default new TodoController();
